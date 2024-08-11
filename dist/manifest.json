@@ -1,0 +1,22 @@
+{
+    "name": "Linkedin Scrapper",
+    "version": "1.0",
+    "manifest_version": 3,
+    "permissions": [
+        "tabs",
+        "activeTab",
+        "scripting",
+        "webNavigation"
+    ],
+    "host_permissions": [
+        "https://www.linkedin.com/*",
+        "http://www.linkedin.com/*"
+    ],
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
+    "action": {
+        "default_title": "Open Popup in New Tab"
+    }
+}
