@@ -12,8 +12,13 @@ export function getTabs(sendResponse) {
 
 export function createNewTab(sendResponse) {
     chrome.tabs.create({ url: "" }, function (newTab) {
-        console.log("New tab opened with ID:", newTab.id);
         sendResponse({ newTabId: newTab.id });
+    });
+}
+
+export function removeTab(targetTab, sendResponse) {
+    chrome.tabs.remove(targetTab, function () {
+        sendResponse({ status: "removed" });
     });
 }
 

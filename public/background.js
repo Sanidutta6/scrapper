@@ -2,7 +2,7 @@ import { getTabs, createNewTab, removeTab, tabHandler } from "./tabHandler.js";
 import { scrapeCompanyPage, scrapeLinkedinJobList, scrapeJobPage, scrapeLinkedinProfile, linkedinConnectionStatus } from "./linkedin-scrapper.js";
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log(message.action)
+    console.log(message)
     if (message.action === "scrapper.getTabs") {
         getTabs(sendResponse);
     }
@@ -11,6 +11,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
     else if (message.action === "scrapper.removeTab") {
         const { targetTab } = message;
+        console.log(targetTab)
         removeTab(targetTab, sendResponse);
     }
     else if (message.action === "scrapper.scrapeLiProfiles") {

@@ -5,7 +5,6 @@ export const bulkScrapeFormSchema = z.object({
         .min(5, { message: "Minimum delay should be 5 sec." })
         .max(60, { message: "Minimum delay should be 60 sec." }),
     links: z.string()
-        .nonempty("Links are required")
         .transform((value) => value.split('\n').map(link => link.trim()).filter(link => link !== ""))
         .refine((links) => {
             return links.every(link => isValidURL(link));
@@ -18,7 +17,6 @@ export const singleScrapeFormSchema = z.object({
         .min(5, { message: "Minimum delay should be 5 sec." })
         .max(60, { message: "Minimum delay should be 60 sec." }),
     links: z.string()
-        .nonempty("Link is required")
         .url("Please enter a valid URL"),
 });
 

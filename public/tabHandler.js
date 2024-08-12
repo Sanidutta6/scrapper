@@ -16,8 +16,8 @@ export function createNewTab(sendResponse) {
     });
 }
 
-export function removeTab(tabId, sendResponse) {
-    chrome.tabs.remove(tabId, function () {
+export function removeTab(targetTab, sendResponse) {
+    chrome.tabs.remove(targetTab, function () {
         sendResponse({ status: "removed" });
     });
 }

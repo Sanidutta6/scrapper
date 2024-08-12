@@ -22,7 +22,11 @@ export function DataView({ data, className }) {
     const serializeData = (obj, prefix = '') =>
         Object.keys(obj).reduce((acc, key) => {
             const newKey = prefix ? `${prefix}.${key}` : key;
-            if (typeof obj[key] === 'object' && obj[key] !== null) {
+            if (Array.isArray(obj[key])) {
+                obj[key].forEach((item, index) => {
+                    Object.assign(acc, serializeData(item, `${newKey}[${index}]`));
+                });
+            } else if (typeof obj[key] === 'object' && obj[key] !== null) {
                 Object.assign(acc, serializeData(obj[key], newKey));
             } else {
                 acc[newKey] = obj[key];
@@ -33,8 +37,10 @@ export function DataView({ data, className }) {
     // Flattened data array
     const flattenedData = data.map(item => serializeData(item));
 
-    // Get table headers from the first item's keys
-    const headers = flattenedData.length > 0 ? Object.keys(flattenedData[0]) : [];
+    // Get unique table headers from all serialized data
+    const headers = Array.from(
+        new Set(flattenedData.flatMap(item => Object.keys(item)))
+    );
 
     // Convert flattened data to CSV format
     const convertToCSV = (data) => {
