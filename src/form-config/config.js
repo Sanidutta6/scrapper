@@ -71,5 +71,6 @@ export const singleScrapeFormConfig = {
         label: "Link",
         type: "text",
         required: true,
+        defaultValue: "",
     },
 }

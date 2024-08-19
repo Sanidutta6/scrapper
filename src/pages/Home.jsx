@@ -57,6 +57,15 @@ export default function Home() {
                             <Button className="w-full" onClick={()=> {navigate("/scrape/connectionStatus")}}>Check Connection Status</Button>
                         </CardContent>
                     </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Linkedin Search Scrape</CardTitle>
+                            <CardDescription>Scrape result of linkedin search</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Button className="w-full" onClick={()=> {navigate("/scrape/scrapeLiSearchResult")}}>Check Connection Status</Button>
+                        </CardContent>
+                    </Card>
                 </div>
                 <div className="mt-6 md:mt-10">
                     <Card>

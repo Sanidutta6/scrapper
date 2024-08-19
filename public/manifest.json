@@ -18,5 +18,8 @@
     },
     "action": {
         "default_title": "Open Popup in New Tab"
+    },
+    "icons": {
+        "128": "mine.png"
     }
 }

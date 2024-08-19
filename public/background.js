@@ -1,8 +1,14 @@
 import { getTabs, createNewTab, removeTab, tabHandler } from "./tabHandler.js";
-import { scrapeCompanyPage, scrapeLinkedinJobList, scrapeJobPage, scrapeLinkedinProfile, linkedinConnectionStatus } from "./linkedin-scrapper.js";
+import { 
+    scrapeCompanyPage,
+    scrapeLinkedinJobList,
+    scrapeJobPage,
+    scrapeLinkedinProfile,
+    linkedinConnectionStatus,
+    scrapeLinkedinSearchResult } from "./linkedin-scrapper.js";
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log(message)
+    console.log("Background.js")
     if (message.action === "scrapper.getTabs") {
         getTabs(sendResponse);
     }
@@ -11,7 +17,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
     else if (message.action === "scrapper.removeTab") {
         const { targetTab } = message;
-        console.log(targetTab)
         removeTab(targetTab, sendResponse);
     }
     else if (message.action === "scrapper.scrapeLiProfiles") {
@@ -28,6 +33,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     }
     else if (message.action === "scrapper.connectionStatus") {
         tabHandler(message, sendResponse, linkedinConnectionStatus);
+    }
+    else if (message.action === "scrapper.scrapeLiSearchResult") {
+        tabHandler(message, sendResponse, scrapeLinkedinSearchResult);
     }
     else {
         console.error("Invalid action received:", message.action);

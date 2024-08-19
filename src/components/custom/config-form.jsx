@@ -33,7 +33,9 @@ export function ConfigForm({ config, FormSchema, task, setData }) {
   async function onSubmit(data) {
     try {
       setLoading(true);
-      let { delay, links } = data;
+      // Normalize the keys
+      const delay = data.delay;
+      let links = data.links || data.link; // Handle both cases
 
       // Ensure task is defined and valid
       if (!task) {
@@ -65,11 +67,12 @@ export function ConfigForm({ config, FormSchema, task, setData }) {
           resolve(response);
         });
       });
+      console.log(scrapeResponse);
 
       setData(scrapeResponse.results);
 
       // Close the tab after scraping is done
-      const tabStatus = await new Promise((resolve, reject) => {
+      await new Promise((resolve, reject) => {
         chrome.runtime.sendMessage({ action: "scrapper.removeTab", targetTab }, (response) => {
           if (chrome.runtime.lastError) {
             return reject(new Error(chrome.runtime.lastError.message));
@@ -78,7 +81,6 @@ export function ConfigForm({ config, FormSchema, task, setData }) {
         });
       });
 
-      console.log(tabStatus);
     } catch (error) {
       console.error("Error in onSubmit:", error);
     } finally {
@@ -104,24 +106,35 @@ export function ConfigForm({ config, FormSchema, task, setData }) {
                   <FormItem>
                     <FormLabel>{config[key].label}</FormLabel>
                     <FormControl>
-                      {config[key].type === "textarea" ? (
-                        <Textarea placeholder={config[key].label} {...field} />
-                      ) : (
-                        <Input
-                          type={config[key].type}
-                          placeholder={config[key].label}
-                          {...field}
-                          value={field.value !== undefined ? field.value : ""}
-                          onChange={(e) => {
-                            const { type, value } = e.target;
-                            if (type === "number") {
-                              field.onChange(value === "" ? "" : Number(value));
-                            } else {
-                              field.onChange(value);
-                            }
-                          }}
-                        />
-                      )}
+                      {(() => {
+                        if (config[key].type === "textarea") {
+                          return (
+                            <Textarea placeholder={config[key].label} {...field} />
+                          );
+                        } else if (config[key].type === "text") {
+                          return (
+                            <Input type="text" placeholder={config[key].label} {...field} />
+                          );
+                        } else if (config[key].type === "number") {
+                          return (
+                            <Input
+                              type="number"
+                              placeholder={config[key].label}
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                              onBlur={(e) => {
+                                if (isNaN(e.target.valueAsNumber)) {
+                                  field.onChange(5); // Set to a default value if it's not a valid number
+                                }
+                              }}
+                            />
+                          );
+                        } else {
+                          // Handle other input types if necessary
+                          return null;
+                        }
+                      })()}
                     </FormControl>
                     {config[key].description && (
                       <FormDescription>{config[key].description}</FormDescription>

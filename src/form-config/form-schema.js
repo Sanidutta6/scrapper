@@ -16,7 +16,7 @@ export const singleScrapeFormSchema = z.object({
     delay: z.number()
         .min(5, { message: "Minimum delay should be 5 sec." })
         .max(60, { message: "Minimum delay should be 60 sec." }),
-    links: z.string()
+    link: z.string()
         .url("Please enter a valid URL"),
 });
 

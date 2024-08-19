@@ -58,7 +58,9 @@ async function scrapeLinksInTab(tabId, links, delay, sendResponse, func) {
             scrollTargetTabToBottom(tabId);
 
             const result = await executeScriptInTab(tabId, func);
-            results.push(result || null);
+            if (result) {
+                results.push(result || null);
+            }
 
             await new Promise(resolve => setTimeout(resolve, delay * 1000));
         }

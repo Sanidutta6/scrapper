@@ -23,9 +23,14 @@ export function DataView({ data, className }) {
         Object.keys(obj).reduce((acc, key) => {
             const newKey = prefix ? `${prefix}.${key}` : key;
             if (Array.isArray(obj[key])) {
-                obj[key].forEach((item, index) => {
-                    Object.assign(acc, serializeData(item, `${newKey}[${index}]`));
-                });
+                // Handle arrays with primitive values
+                if (typeof obj[key][0] !== 'object') {
+                    acc[newKey] = obj[key].join(', '); // Join array elements with a comma separator
+                } else {
+                    obj[key].forEach((item, index) => {
+                        Object.assign(acc, serializeData(item, `${newKey}[${index}]`));
+                    });
+                }
             } else if (typeof obj[key] === 'object' && obj[key] !== null) {
                 Object.assign(acc, serializeData(obj[key], newKey));
             } else {
@@ -35,7 +40,7 @@ export function DataView({ data, className }) {
         }, {});
 
     // Flattened data array
-    const flattenedData = data.map(item => serializeData(item));
+    const flattenedData = Array.isArray(data) ? data.map(item => serializeData(item)) : [serializeData(data)];
 
     // Get unique table headers from all serialized data
     const headers = Array.from(

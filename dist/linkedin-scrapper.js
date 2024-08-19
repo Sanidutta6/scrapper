@@ -41,35 +41,45 @@ function scrapeCompanyPage() {
 }
 
 async function scrapeLinkedinJobList() {
-    // Job List
     const linkedinJobListXPaths = {
         totalJobs: `//*[@id="main"]/div/div[2]/div[1]/header/div/small`,
+        jobListContainer: `.//div[contains(concat(" ",normalize-space(@class)," ")," jobs-search-results-list ")]`,
         jobList: `.//ul[contains(concat(' ',normalize-space(@class),' '),' scaffold-layout__list-container ')]//li[contains(concat(' ',normalize-space(@class),' '),' jobs-search-results__list-item ')][count(.//div) > 0]`,
         jobTitle: `.//a[contains(concat(' ',normalize-space(@class),' '),' disabled ')]/span`,
         jobLink: `.//a[contains(concat(' ',normalize-space(@class),' '),' disabled ')]/@href`,
         companyName: `.//span[contains(concat(' ',normalize-space(@class),' '),' job-card-container__primary-description ')]`,
         companyLocation: `.//li[contains(concat(' ',normalize-space(@class),' '),' job-card-container__metadata-item ')]`,
-        // 
         paginationBtnList: `.//ul[contains(concat(" ",normalize-space(@class)," ")," artdeco-pagination__pages ")][contains(concat(" ",normalize-space(@class)," ")," artdeco-pagination__pages--number ")]`,
         nextPageBtn: `//li[contains(@class, 'active') and contains(@class, 'selected')]/following-sibling::li[1]/button`,
         paginationState: `.//div[contains(concat(" ",normalize-space(@class)," ")," artdeco-pagination__page-state ")]`,
     }
 
-    const totalJobs = document.evaluate(linkedinJobListXPaths.totalJobs, document, null, XPathResult.STRING_TYPE, null).stringValue.trim();
     const jobs = [];
-    let paginationBtnList = "", nextPageBtn = "";
+    let i = 1;
 
     while (true) {
-        // Scroll to end of the page
-        window.scrollTo(0, document.body.scrollHeight);
+        // Scroll incrementally to ensure all jobs are loaded
+        const joblistContainer = document.evaluate(linkedinJobListXPaths.jobListContainer, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+        let currentScrollPosition = 0;
+        const scrollIncrement = 300; // Pixels to scroll each time
 
-        await new Promise(resolve => setTimeout(resolve, 10000));
+        while (currentScrollPosition < joblistContainer.scrollHeight) {
+            joblistContainer.scrollTo({
+                top: currentScrollPosition,
+                behavior: 'smooth'
+            });
+            currentScrollPosition += scrollIncrement;
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Adjust delay as needed
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 3000)); // Additional delay to ensure new items load
 
         const jobListElement = document.evaluate(linkedinJobListXPaths.jobList, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+        console.log("Iteration:", i, ", Jobs Found:", jobListElement.snapshotLength);
 
         if (jobListElement.snapshotLength > 0) {
-            for (let i = 0; i < jobListElement.snapshotLength; i++) {
-                const jobItem = jobListElement.snapshotItem(i);
+            for (let j = 0; j < jobListElement.snapshotLength; j++) {
+                const jobItem = jobListElement.snapshotItem(j);
 
                 const jobTitle = document.evaluate(linkedinJobListXPaths.jobTitle, jobItem, null, XPathResult.STRING_TYPE, null).stringValue.trim();
                 const jobLink = "https://www.linkedin.com" + document.evaluate(linkedinJobListXPaths.jobLink, jobItem, null, XPathResult.STRING_TYPE, null).stringValue.trim().split("?")[0];
@@ -85,7 +95,9 @@ async function scrapeLinkedinJobList() {
 
         if (nextPageBtn) {
             try {
+                i++;
                 nextPageBtn.click();
+                await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for the next page to load
                 continue;
             } catch (error) {
                 console.error("Failed to click next page button:", error);
@@ -95,8 +107,7 @@ async function scrapeLinkedinJobList() {
         }
     }
 
-    console.log({ totalJobs, jobs })
-    return { totalJobs, jobs };
+    return jobs;
 }
 
 function scrapeJobPage() {
@@ -210,7 +221,67 @@ function linkedinConnectionStatus() {
         status = "Accepted";
     }
 
-    return status;
+    return { status };
 }
 
-export { scrapeCompanyPage, scrapeLinkedinJobList, scrapeJobPage, scrapeLinkedinProfile, linkedinConnectionStatus };
+async function scrapeLinkedinSearchResult() {
+    const linkedinSearchXpaths = {
+        searchListContainer: `.//ul[contains(concat(" ",normalize-space(@class)," ")," reusable-search__entity-result-list ")]`,
+        searchList: `.//ul[contains(concat(" ",normalize-space(@class)," ")," reusable-search__entity-result-list ")]//li[contains(concat(" ",normalize-space(@class)," ")," reusable-search__result-container ")][count(.//div) > 0]`,
+        name: `.//span[contains(concat(" ",normalize-space(@class)," ")," entity-result__title-text ")][contains(concat(" ",normalize-space(@class)," ")," t-16 ")]//a//span//span[(count(preceding-sibling::*)+1) = 1]`,
+        linkedin: `.//span[contains(concat(" ",normalize-space(@class)," ")," entity-result__title-text ")][contains(concat(" ",normalize-space(@class)," ")," t-16 ")]//a/@href`,
+        title: `.//div[contains(concat(" ",normalize-space(@class)," ")," entity-result__primary-subtitle ")][contains(concat(" ",normalize-space(@class)," ")," t-14 ")][contains(concat(" ",normalize-space(@class)," ")," t-black ")][contains(concat(" ",normalize-space(@class)," ")," t-normal ")]`,
+        location: `.//div[contains(concat(" ",normalize-space(@class)," ")," entity-result__secondary-subtitle ")][contains(concat(" ",normalize-space(@class)," ")," t-14 ")][contains(concat(" ",normalize-space(@class)," ")," t-normal ")]`,
+        summary: `.//p[contains(concat(" ",normalize-space(@class)," ")," entity-result__summary ")][contains(concat(" ",normalize-space(@class)," ")," entity-result__summary--2-lines ")][contains(concat(" ",normalize-space(@class)," ")," t-12 ")][contains(concat(" ",normalize-space(@class)," ")," t-black--light ")]`,
+        insights: `.//div[contains(concat(" ",normalize-space(@class)," ")," reusable-search-simple-insight ")]`,
+        nextPageBtn: `.//button[contains(concat(" ",normalize-space(@class)," ")," artdeco-pagination__button--next ") and not(contains(concat(" ",normalize-space(@class)," ")," artdeco-button--disabled "))]`,
+    } // artdeco-button--disabled
+
+    const results = [];
+
+    while (true) {
+        window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: 'smooth'
+        });
+
+        await new Promise(resolve => setTimeout(resolve, 3000)); // Additional delay to ensure new items load
+
+        const searchListElement = document.evaluate(linkedinSearchXpaths.searchList, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+
+        if (searchListElement.snapshotLength > 0) {
+            for (let j = 0; j < searchListElement.snapshotLength; j++) {
+                const searchItem = searchListElement.snapshotItem(j);
+
+                const name = document.evaluate(linkedinSearchXpaths.name, searchItem, null, XPathResult.STRING_TYPE, null).stringValue.trim();
+                const linkedin = document.evaluate(linkedinSearchXpaths.linkedin, searchItem, null, XPathResult.STRING_TYPE, null).stringValue.trim().split("?")[0];
+                const title = document.evaluate(linkedinSearchXpaths.title, searchItem, null, XPathResult.STRING_TYPE, null).stringValue.trim();
+                const location = document.evaluate(linkedinSearchXpaths.location, searchItem, null, XPathResult.STRING_TYPE, null).stringValue.trim();
+                const summary = document.evaluate(linkedinSearchXpaths.summary, searchItem, null, XPathResult.STRING_TYPE, null).stringValue.trim();
+                const insights = document.evaluate(linkedinSearchXpaths.insights, searchItem, null, XPathResult.STRING_TYPE, null).stringValue.trim();
+
+                results.push({ name, linkedin, title, location, summary, insights });
+            }
+        }
+
+        const nextPageBtn = document.evaluate(linkedinSearchXpaths.nextPageBtn, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+        await new Promise(resolve => setTimeout(resolve, 5000));
+
+        if (nextPageBtn) {
+            try {
+                nextPageBtn.click();
+                await new Promise(resolve => setTimeout(resolve, 5000)); // Wait for the next page to load
+            } catch (error) {
+                console.log("Failed to click next page button:", error);
+                await new Promise(resolve => setTimeout(resolve, 5000));
+            }
+        } else {
+            console.log("breaking")
+            break;
+        }
+    }
+
+    return results;
+}
+
+export { scrapeCompanyPage, scrapeLinkedinJobList, scrapeJobPage, scrapeLinkedinProfile, linkedinConnectionStatus, scrapeLinkedinSearchResult };

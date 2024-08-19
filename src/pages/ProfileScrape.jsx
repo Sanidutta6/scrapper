@@ -13,13 +13,13 @@ export default function ProfileScrape() {
         <div className="flex flex-col gap-6 p-6 md:p-10">
             <h1 className="text-3xl font-bold text-white">LinkedIn Profile Scraper</h1>
             <div className="grid grid-cols-3 gap-6">
-                {(id === "scrapeJobList") ? (
+                {(id === "scrapeJobList" || id === "scrapeLiSearchResult") ? (
                     <ConfigForm config={singleScrapeFormConfig} FormSchema={singleScrapeFormSchema} task={id} setData={setScrapedData} />
                 ) : (
                     <ConfigForm config={bulkScrapeFormConfig} FormSchema={bulkScrapeFormSchema} task={id} setData={setScrapedData} />
                 )}
                 {/* Data Preview */}
-                <DataView className="col-span-2" data={scrapedData} />
+                <DataView className="col-span-2 max-h-[600px] overflow-auto" data={scrapedData} />
             </div>
         </div>
     )
