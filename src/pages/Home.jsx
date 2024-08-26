@@ -66,6 +66,24 @@ export default function Home() {
                             <Button className="w-full" onClick={()=> {navigate("/scrape/scrapeLiSearchResult")}}>Check Connection Status</Button>
                         </CardContent>
                     </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Naukri Jobs Scrape</CardTitle>
+                            <CardDescription>Scrape jobs from naukri</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Button className="w-full" onClick={()=> {navigate("/scrape/scrapeNaukriJobs")}}>Scrape Jobs</Button>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Scrape Websites</CardTitle>
+                            <CardDescription>Scrape websites using xpaths</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Button className="w-full" onClick={()=> {navigate("/scrape/scrapeWebsiteUsingXpath")}}>Scrape Websites</Button>
+                        </CardContent>
+                    </Card>
                 </div>
                 <div className="mt-6 md:mt-10">
                     <Card>

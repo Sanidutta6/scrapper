@@ -4,7 +4,7 @@ import App from './App.jsx';
 import './index.css';
 import { ThemeProvider } from './components/custom/theme-provider.jsx';
 import { createMemoryRouter, RouterProvider } from 'react-router-dom';
-import { Home, ProfileScrape } from './pages/index';
+import { Home, Scrape } from './pages/index';
 
 // Define routes with createMemoryRouter
 const router = createMemoryRouter([
@@ -18,7 +18,7 @@ const router = createMemoryRouter([
       },
       {
         path: `/scrape/:id`,
-        element: <ProfileScrape />
+        element: <Scrape />
       },
     ]
   }

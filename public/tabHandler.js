@@ -23,21 +23,21 @@ export function removeTab(targetTab, sendResponse) {
 }
 
 export function tabHandler(message, sendResponse, func) {
-    const { links, delay, targetTab: userGivenTargetTab } = message;
+    const { links, delay, xpaths, targetTab: userGivenTargetTab } = message;
 
     chrome.tabs.get(userGivenTargetTab, function (tab) {
         if (chrome.runtime.lastError || !tab) {
             chrome.tabs.create({ url: "" }, function (newTab) {
                 console.log("New target tab opened with ID:", newTab.id);
-                scrapeLinksInTab(newTab.id, links, delay, sendResponse, func);
+                scrapeLinksInTab(newTab.id, links, delay, xpaths, sendResponse, func);
             });
         } else {
-            scrapeLinksInTab(userGivenTargetTab, links, delay, sendResponse, func);
+            scrapeLinksInTab(userGivenTargetTab, links, delay, xpaths, sendResponse, func);
         }
     });
 }
 
-async function scrapeLinksInTab(tabId, links, delay, sendResponse, func) {
+async function scrapeLinksInTab(tabId, links, delay, xpaths, sendResponse, func) {
     let results = [];
 
     // Single link in string format
@@ -47,7 +47,7 @@ async function scrapeLinksInTab(tabId, links, delay, sendResponse, func) {
 
         scrollTargetTabToBottom(tabId);
 
-        results = await executeScriptInTab(tabId, func);
+        results = await executeScriptInTab(tabId, func, xpaths);
     } else { // Multiple links in array format
         for (let i = 0; i < links.length; i++) {
             const link = links[i];
@@ -57,7 +57,7 @@ async function scrapeLinksInTab(tabId, links, delay, sendResponse, func) {
 
             scrollTargetTabToBottom(tabId);
 
-            const result = await executeScriptInTab(tabId, func);
+            const result = await executeScriptInTab(tabId, func, xpaths);
             if (result) {
                 results.push(result || null);
             }
@@ -82,11 +82,12 @@ function updateTabAndWait(tabId, url) {
     });
 }
 
-function executeScriptInTab(tabId, func) {
+function executeScriptInTab(tabId, func, xpaths) {
     return new Promise((resolve) => {
         chrome.scripting.executeScript({
             target: { tabId },
-            func
+            func,
+            args: [xpaths]
         }, (result) => {
             if (chrome.runtime.lastError) {
                 console.error("Script execution error:", chrome.runtime.lastError);

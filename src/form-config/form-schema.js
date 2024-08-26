@@ -12,6 +12,21 @@ export const bulkScrapeFormSchema = z.object({
             message: "Each line must be a valid URL",
         }),
 });
+export const bulkScrapeWithBulkXpathsFormSchema = z.object({
+    delay: z.number()
+        .min(5, { message: "Minimum delay should be 5 sec." })
+        .max(60, { message: "Minimum delay should be 60 sec." }),
+    links: z.string()
+        .transform((value) => value.split('\n').map(link => link.trim()).filter(link => link !== ""))
+        .refine((links) => {
+            return links.every(link => isValidURL(link));
+        }, {
+            message: "Each line must be a valid URL",
+        }),
+    xpaths: z.string()
+        .transform((value) => value.split('\n').map(xpath => xpath.trim()).filter(xpath => xpath !== "")),
+});
+
 export const singleScrapeFormSchema = z.object({
     delay: z.number()
         .min(5, { message: "Minimum delay should be 5 sec." })

@@ -36,6 +36,7 @@ export function ConfigForm({ config, FormSchema, task, setData }) {
       // Normalize the keys
       const delay = data.delay;
       let links = data.links || data.link; // Handle both cases
+      const xpaths = data.xpaths || [];
 
       // Ensure task is defined and valid
       if (!task) {
@@ -60,7 +61,7 @@ export function ConfigForm({ config, FormSchema, task, setData }) {
 
       // Perform the scraping task
       const scrapeResponse = await new Promise((resolve, reject) => {
-        chrome.runtime.sendMessage({ action: `scrapper.${task}`, targetTab, delay, links }, (response) => {
+        chrome.runtime.sendMessage({ action: `scrapper.${task}`, targetTab, delay, links, xpaths }, (response) => {
           if (chrome.runtime.lastError) {
             return reject(new Error(chrome.runtime.lastError.message));
           }
@@ -69,7 +70,7 @@ export function ConfigForm({ config, FormSchema, task, setData }) {
       });
       console.log(scrapeResponse);
 
-      setData(scrapeResponse.results);
+      setData(scrapeResponse.results || []);
 
       // Close the tab after scraping is done
       await new Promise((resolve, reject) => {

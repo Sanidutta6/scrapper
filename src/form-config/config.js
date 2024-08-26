@@ -60,6 +60,27 @@ export const bulkScrapeFormConfig = {
     },
 }
 
+export const bulkScrapeWithBulkXpathsFormConfig = {
+    delay: {
+        label: "Delay (sec)",
+        type: "number",
+        defaultValue: 15,
+        required: true
+    },
+    links: {
+        label: "Links",
+        type: "textarea",
+        required: true,
+        defaultValue: "",
+    },
+    xpaths: {
+        label: "XPaths",
+        type: "textarea",
+        required: true,
+        defaultValue: "",
+    },
+}
+
 export const singleScrapeFormConfig = {
     delay: {
         label: "Delay (sec)",

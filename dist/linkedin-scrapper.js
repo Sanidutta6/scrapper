@@ -276,12 +276,13 @@ async function scrapeLinkedinSearchResult() {
                 await new Promise(resolve => setTimeout(resolve, 5000));
             }
         } else {
-            console.log("breaking")
             break;
         }
     }
 
     return results;
 }
+
+// TODO: Conneciton send
 
 export { scrapeCompanyPage, scrapeLinkedinJobList, scrapeJobPage, scrapeLinkedinProfile, linkedinConnectionStatus, scrapeLinkedinSearchResult };

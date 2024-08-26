@@ -1,4 +1,4 @@
 import Home from "./Home";
-import ProfileScrape from "./ProfileScrape";
+import Scrape from "./Scrape";
 
-export { Home, ProfileScrape };
+export { Home, Scrape };
